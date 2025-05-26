@@ -16,8 +16,13 @@ public class AccommodationController {
         this.accommodationService = accommodationService;
     }
 
-    @PostMapping("/addAccommodation")
-    public AccommodationDTO addAccommodation(@RequestBody AccommodationDTO dto) {
+    @GetMapping
+    public List<AccommodationDTO> getAllAccommodations() {
+        return accommodationService.getAllAccommodations();
+    }
+
+    @PostMapping
+    public AccommodationDTO createAccommodation(@RequestBody AccommodationDTO dto) {
         return accommodationService.addAccommodation(dto);
     }
 

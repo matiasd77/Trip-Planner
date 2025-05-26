@@ -2,7 +2,7 @@ package PlanifikuesInteraktiviUdhetimeve.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Data
@@ -10,15 +10,35 @@ import java.time.LocalDate;
 public class Accommodation {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_id")
+    private Trip trip;
+    
     private String name;
-    private String address;
-    private LocalDate checkIn;
-    private LocalDate checkOut;
+    private String description;
+    private String location;
+    private Double price;
+    private Integer rating;
+    private String type;
+    
+    @Column(columnDefinition = "TEXT")
+    private String amenities;
+    
+    private String checkIn;
+    private String checkOut;
 
-    public Accommodation(Long id, String name, String address, LocalDate checkIn, LocalDate checkOut, Trip trip) {
+    public Accommodation(Long id, String name, String description, String location,
+                        Double price, Integer rating, String type, List<String> amenities,
+                        String checkIn, String checkOut, Trip trip) {
         this.id = id;
         this.name = name;
-        this.address = address;
+        this.description = description;
+        this.location = location;
+        this.price = price;
+        this.rating = rating;
+        this.type = type;
+        this.amenities = amenities != null ? String.join(",", amenities) : "";
         this.checkIn = checkIn;
         this.checkOut = checkOut;
         this.trip = trip;
@@ -40,27 +60,67 @@ public class Accommodation {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
+    public String getDescription() {
+        return description;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public LocalDate getCheckIn() {
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public List<String> getAmenities() {
+        return amenities != null ? List.of(amenities.split(",")) : List.of();
+    }
+
+    public void setAmenities(List<String> amenities) {
+        this.amenities = amenities != null ? String.join(",", amenities) : "";
+    }
+
+    public String getCheckIn() {
         return checkIn;
     }
 
-    public void setCheckIn(LocalDate checkIn) {
+    public void setCheckIn(String checkIn) {
         this.checkIn = checkIn;
     }
 
-    public LocalDate getCheckOut() {
+    public String getCheckOut() {
         return checkOut;
     }
 
-    public void setCheckOut(LocalDate checkOut) {
+    public void setCheckOut(String checkOut) {
         this.checkOut = checkOut;
     }
 
@@ -71,7 +131,4 @@ public class Accommodation {
     public void setTrip(Trip trip) {
         this.trip = trip;
     }
-
-    @ManyToOne
-    private Trip trip;
 }

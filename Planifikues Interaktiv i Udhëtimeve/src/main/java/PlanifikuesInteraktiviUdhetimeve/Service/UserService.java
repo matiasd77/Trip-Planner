@@ -33,7 +33,9 @@ public class UserService {
 
         existingUser.setName(userDTO.getName());
         existingUser.setEmail(userDTO.getEmail());
-        existingUser.setPassword(userDTO.getPassword());
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            existingUser.setPassword(userDTO.getPassword());
+        }
         
         // Handle role update safely
         try {
@@ -41,6 +43,22 @@ public class UserService {
             existingUser.setRole(role);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid role: " + userDTO.getRole());
+        }
+
+        // Update new profile fields
+        existingUser.setPhone(userDTO.getPhone());
+        existingUser.setAddress(userDTO.getAddress());
+        
+        // Update preferences
+        if (userDTO.getPreferences() != null) {
+            User.UserPreferences preferences = existingUser.getPreferences();
+            if (preferences == null) {
+                preferences = new User.UserPreferences();
+                existingUser.setPreferences(preferences);
+            }
+            preferences.setLanguage(userDTO.getPreferences().getLanguage());
+            preferences.setCurrency(userDTO.getPreferences().getCurrency());
+            preferences.setNotifications(userDTO.getPreferences().isNotifications());
         }
 
         User updatedUser = userRepository.save(existingUser);
@@ -61,5 +79,11 @@ public class UserService {
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public UserDTO getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(UserMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 }

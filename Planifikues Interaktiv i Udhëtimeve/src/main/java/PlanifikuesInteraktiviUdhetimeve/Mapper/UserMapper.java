@@ -7,13 +7,27 @@ import PlanifikuesInteraktiviUdhetimeve.Entity.Role;
 public class UserMapper {
 
     public static UserDTO toDTO(User user) {
-        return new UserDTO(
-            user.getId(), 
-            user.getName(), 
-            user.getEmail(), 
-            user.getRole().name(),
-            user.getPassword()
-        );
+        UserDTO.UserPreferences preferences = null;
+        if (user.getPreferences() != null) {
+            preferences = new UserDTO.UserPreferences(
+                user.getPreferences().getLanguage(),
+                user.getPreferences().getCurrency(),
+                user.getPreferences().isNotifications()
+            );
+        } else {
+            preferences = new UserDTO.UserPreferences("en", "USD", true);
+        }
+
+        return UserDTO.builder()
+            .id(user.getId())
+            .name(user.getName())
+            .email(user.getEmail())
+            .role(user.getRole().name())
+            .password(user.getPassword())
+            .phone(user.getPhone())
+            .address(user.getAddress())
+            .preferences(preferences)
+            .build();
     }
 
     public static User toEntity(UserDTO dto) {
@@ -23,6 +37,20 @@ public class UserMapper {
         user.setEmail(dto.getEmail());
         user.setRole(Role.valueOf(dto.getRole().toUpperCase()));
         user.setPassword(dto.getPassword());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+        
+        if (dto.getPreferences() != null) {
+            User.UserPreferences preferences = new User.UserPreferences(
+                dto.getPreferences().getLanguage(),
+                dto.getPreferences().getCurrency(),
+                dto.getPreferences().isNotifications()
+            );
+            user.setPreferences(preferences);
+        } else {
+            user.setPreferences(new User.UserPreferences("en", "USD", true));
+        }
+        
         return user;
     }
 }

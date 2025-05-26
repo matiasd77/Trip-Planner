@@ -3,7 +3,9 @@ package PlanifikuesInteraktiviUdhetimeve.Controller;
 
 import PlanifikuesInteraktiviUdhetimeve.DTO.UserDTO;
 import PlanifikuesInteraktiviUdhetimeve.Service.UserService;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.context.annotation.Role;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,23 @@ public class UserController {
         return userService.updateUser(id, userDTO);
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<UserDTO> updateProfile(@RequestBody UserDTO userDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        UserDTO currentUser = userService.getUserByEmail(userEmail);
+        
+        // Preserve sensitive data
+        userDTO.setId(currentUser.getId());
+        userDTO.setRole(currentUser.getRole());
+        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+            userDTO.setPassword(currentUser.getPassword());
+        }
+        
+        UserDTO updatedUser = userService.updateUser(currentUser.getId(), userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
     @GetMapping("/{id}")
     public UserDTO getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
@@ -41,5 +60,13 @@ public class UserController {
     @DeleteMapping("/deleteuserWithId/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getCurrentUserProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        UserDTO profile = userService.getUserByEmail(userEmail);
+        return ResponseEntity.ok(profile);
     }
 }

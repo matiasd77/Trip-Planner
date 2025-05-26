@@ -20,6 +20,21 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String phone;
+    private String address;
+    
+    @Embedded
+    private UserPreferences preferences;
+    
+    @Embeddable
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserPreferences {
+        private String language = "en";
+        private String currency = "USD";
+        private boolean notifications = true;
+    }
 
     public Long getId() {
         return id;
@@ -100,5 +115,30 @@ public class User implements UserDetails {
     }
 
     public User() {
+    }
+    
+    // Additional getters and setters for new fields
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public UserPreferences getPreferences() {
+        return preferences;
+    }
+
+    public void setPreferences(UserPreferences preferences) {
+        this.preferences = preferences;
     }
 }
