@@ -1,10 +1,40 @@
 .App {
   text-align: center;
+  min-height: 100vh;
+  position: relative;
+  background: linear-gradient(135deg, rgba(245, 247, 250, 0.95) 0%, rgba(228, 232, 235, 0.95) 100%);
+}
+
+.App::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('./assets/travel img.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  z-index: -1;
+  filter: brightness(0.85) contrast(1.1) saturate(1.2);
+  animation: backgroundZoom 30s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundZoom {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.1));
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -14,7 +44,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -22,10 +52,17 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .App-link {
-  color: #61dafb;
+  color: #64b5f6;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.App-link:hover {
+  color: #90caf9;
 }
 
 @keyframes App-logo-spin {
@@ -35,4 +72,220 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Global styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+  background-size: 200% 200%;
+  animation: gradientAnimation 15s ease infinite;
+}
+
+/* Enhanced Card styles */
+.MuiCard-root {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 24px !important;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Enhanced Button styles */
+.MuiButton-root {
+  text-transform: none !important;
+  border-radius: 20px !important;
+  padding: 12px 28px !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  letter-spacing: 0.5px !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.MuiButton-contained {
+  background: linear-gradient(45deg, #1a237e 30%, #283593 90%) !important;
+  box-shadow: 0 6px 12px rgba(26, 35, 126, 0.3) !important;
+}
+
+.MuiButton-contained:hover {
+  background: linear-gradient(45deg, #283593 30%, #3949ab 90%) !important;
+  box-shadow: 0 8px 16px rgba(26, 35, 126, 0.4) !important;
+  transform: translateY(-3px);
+}
+
+.MuiButton-outlined {
+  border-width: 2px !important;
+  border-color: rgba(33, 150, 243, 0.8) !important;
+}
+
+.MuiButton-outlined:hover {
+  border-color: #2196F3 !important;
+  background-color: rgba(33, 150, 243, 0.08) !important;
+  transform: translateY(-2px);
+}
+
+/* Container styles */
+.MuiContainer-root {
+  padding: 32px !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Enhanced Form styles */
+.MuiTextField-root {
+  margin-bottom: 24px !important;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.MuiTextField-root:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.MuiTextField-root .MuiOutlinedInput-root {
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+}
+
+.MuiTextField-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(26, 35, 126, 0.5);
+  border-width: 2px;
+}
+
+/* Enhanced Typography styles */
+.MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3 {
+  font-weight: 800 !important;
+  margin-bottom: 36px !important;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(45deg, #1a237e 30%, #3949ab 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.75px !important;
+}
+
+.MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
+  font-weight: 600 !important;
+  letter-spacing: -0.25px !important;
+}
+
+/* Enhanced Navbar styles */
+.MuiAppBar-root {
+  backdrop-filter: blur(16px) !important;
+  background: linear-gradient(135deg, rgba(26, 35, 126, 0.95) 0%, rgba(40, 53, 147, 0.95) 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Enhanced scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #1a237e 30%, #3949ab 90%);
+  border-radius: 10px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Enhanced animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.MuiContainer-root {
+  animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Add hover effects for interactive elements */
+.MuiCard-root:hover, .MuiButton-root:hover, .MuiTextField-root:hover {
+  transform: translateY(-6px);
+}
+
+/* Add glass morphism effect to cards */
+.MuiCard-root {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* Enhanced background animation */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Add loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Add hover effect for links */
+a {
+  position: relative;
+  text-decoration: none;
+  color: #1a237e;
+  transition: color 0.3s ease;
+}
+
+a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(45deg, #1a237e 30%, #3949ab 90%);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
 }

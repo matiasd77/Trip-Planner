@@ -10,9 +10,40 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { users } from '../services/api';
+import { motion } from 'framer-motion';
+import { styled } from '@mui/material/styles';
+import { Visibility, VisibilityOff, Person, Email, Lock } from '@mui/icons-material';
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(6),
+  borderRadius: 24,
+  background: 'rgba(255, 255, 255, 0.98)',
+  backdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    },
+    '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    },
+  },
+}));
 
 const Register = () => {
   const navigate = useNavigate();
@@ -24,6 +55,10 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -33,9 +68,6 @@ const Register = () => {
     }));
   };
 
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -44,6 +76,7 @@ const Register = () => {
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
       return;
     }
 
@@ -52,22 +85,19 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: 'USER' // explicitly set role for new registrations
+        role: 'USER'
       };
       
       const registerResponse = await users.register(registerData);
       setSuccess(true);
 
-      // Automatically log in after successful registration
       const loginResponse = await users.login({
         email: formData.email,
         password: formData.password
       });
       
-      // Update auth context with user data
       login(loginResponse.data);
       
-      // Navigate to home page
       setTimeout(() => {
         navigate('/', { replace: true });
       }, 1500);
@@ -77,82 +107,231 @@ const Register = () => {
                          err.message || 
                          'Registration failed. Please try again.';
       setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center">
-            Register
-          </Typography>
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Confirm Password"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              size="large"
-              sx={{ mt: 3 }}
-              disabled={loading}
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: 4,
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ width: '100%' }}
+        >
+          <StyledPaper>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
-            </Button>
-          </form>
-        </Paper>
+              <Typography
+                variant="h3"
+                component="h1"
+                gutterBottom
+                align="center"
+                sx={{
+                  fontWeight: 700,
+                  mb: 4,
+                  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                Create Account
+              </Typography>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Alert 
+                    severity="error" 
+                    sx={{ 
+                      mb: 3,
+                      borderRadius: 2,
+                      '& .MuiAlert-icon': {
+                        color: 'error.main',
+                      },
+                    }}
+                  >
+                    {error}
+                  </Alert>
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <StyledTextField
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <StyledTextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <StyledTextField
+                  fullWidth
+                  label="Password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock color="primary" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <StyledTextField
+                  fullWidth
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock color="primary" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          edge="end"
+                        >
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  sx={{
+                    mt: 4,
+                    mb: 2,
+                    py: 1.5,
+                    borderRadius: 3,
+                    fontSize: '1.1rem',
+                    textTransform: 'none',
+                    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
+                      boxShadow: '0 6px 16px rgba(33, 150, 243, 0.4)',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    'Create Account'
+                  )}
+                </Button>
+              </form>
+
+              <Box sx={{ mt: 3, textAlign: 'center' }}>
+                <Typography variant="body1" color="text.secondary">
+                  Already have an account?{' '}
+                  <Button
+                    onClick={() => navigate('/login')}
+                    sx={{
+                      color: 'primary.main',
+                      textDecoration: 'none',
+                      fontWeight: 600,
+                      p: 0,
+                      minWidth: 'auto',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                        background: 'none',
+                      },
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                </Typography>
+              </Box>
+            </motion.div>
+          </StyledPaper>
+        </motion.div>
       </Box>
 
       <Snackbar
         open={success}
         autoHideDuration={1500}
-        message="Registration successful! Redirecting to home..."
-      />
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          severity="success" 
+          sx={{ 
+            width: '100%',
+            borderRadius: 2,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          Registration successful! Redirecting to home...
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

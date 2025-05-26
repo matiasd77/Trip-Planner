@@ -15,14 +15,123 @@ import {
   TextField,
   Box,
   IconButton,
+  Chip,
+  Skeleton,
+  Tooltip,
+  Rating,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
+  SelectChangeEvent,
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { 
+  Add as AddIcon, 
+  Delete as DeleteIcon, 
+  Edit as EditIcon,
+  LocationOn,
+  CalendarToday,
+  Hotel,
+  Wifi,
+  Pool,
+  Restaurant,
+  Explore,
+  AttachMoney,
+} from '@mui/icons-material';
 import { accommodations, trips } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { styled } from '@mui/material/styles';
+
+const PageBackground = styled(Box)(({ theme }) => ({
+  minHeight: '100vh',
+  position: 'relative',
+  background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.2) 100%)',
+  '&::before': {
+    content: '""',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundImage: 'url("https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
+    zIndex: -1,
+    filter: 'brightness(0.9) contrast(1.1) saturate(1.2)',
+    animation: 'backgroundZoom 30s ease-in-out infinite alternate',
+  },
+  '@keyframes backgroundZoom': {
+    '0%': {
+      transform: 'scale(1)',
+    },
+    '100%': {
+      transform: 'scale(1.1)',
+    },
+  },
+}));
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+  background: 'rgba(255, 255, 255, 0.95)',
+  backdropFilter: 'blur(16px)',
+  border: '1px solid rgba(255, 255, 255, 0.4)',
+  borderRadius: '24px',
+  overflow: 'hidden',
+  '&:hover': {
+    transform: 'translateY(-12px) scale(1.02)',
+    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
+  },
+}));
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialog-paper': {
+    borderRadius: 24,
+    background: 'rgba(255, 255, 255, 0.98)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.4)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    transition: 'all 0.4s ease',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      transform: 'translateY(-4px)',
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+    },
+    '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+    },
+  },
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    transition: 'all 0.4s ease',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      transform: 'translateY(-4px)',
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+    },
+    '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+    },
+  },
+}));
 
 interface Trip {
   id: number;
@@ -144,193 +253,392 @@ const Accommodations = () => {
 
   if (isLoadingTrips || isLoadingAccommodations) {
     return (
-      <Container>
-        <Typography>Loading...</Typography>
-      </Container>
+      <PageBackground>
+        <Container maxWidth="lg">
+          <Box sx={{ mt: 4, mb: 4 }}>
+            <Skeleton variant="text" width={200} height={40} />
+            <Grid container spacing={3} sx={{ mt: 2 }}>
+              {[1, 2, 3].map((item) => (
+                <Grid item xs={12} sm={6} md={4} key={item}>
+                  <Skeleton variant="rectangular" height={200} />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        </Container>
+      </PageBackground>
     );
   }
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 4, mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" component="h1">
-          Accommodations
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Select Trip</InputLabel>
-            <Select
-              value={selectedTripId}
-              label="Select Trip"
-              onChange={(e) => setSelectedTripId(e.target.value as number)}
-            >
-              {tripsData?.map((trip) => (
-                <MenuItem key={trip.id} value={trip.id}>
-                  {trip.destination}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleOpen}
-            disabled={!selectedTripId}
+    <PageBackground>
+      <Container maxWidth="lg">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Box 
+            sx={{ 
+              mt: 4, 
+              mb: 6, 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center' 
+            }}
           >
-            New Accommodation
-          </Button>
-        </Box>
-      </Box>
-
-      <Grid container spacing={3}>
-        {accommodationsData?.map((accommodation: Accommodation) => (
-          <Grid item xs={12} sm={6} md={4} key={accommodation.id}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  {accommodation.name}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  {accommodation.description}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Location: {accommodation.location}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Type: {accommodation.type}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Price: ${accommodation.price}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Rating: {accommodation.rating}/5
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Check-in: {new Date(accommodation.checkIn).toLocaleDateString()}
-                </Typography>
-                <Typography variant="body2">
-                  Check-out: {new Date(accommodation.checkOut).toLocaleDateString()}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <IconButton size="small" color="primary">
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => deleteMutation.mutate(accommodation.id)}
+            <Typography 
+              variant="h3" 
+              component="h1"
+              sx={{
+                fontWeight: 800,
+                color: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              Accommodations
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <FormControl sx={{ minWidth: 200 }}>
+                <InputLabel sx={{ color: '#ffffff' }}>Select Trip</InputLabel>
+                <Select
+                  value={selectedTripId}
+                  label="Select Trip"
+                  onChange={(e) => setSelectedTripId(e.target.value as number)}
+                  sx={{
+                    borderRadius: 3,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                    },
+                    '& .MuiSelect-select': {
+                      color: '#1a237e',
+                    },
+                  }}
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                  {tripsData?.map((trip: Trip) => (
+                    <MenuItem key={trip.id} value={trip.id}>
+                      {trip.destination}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpen}
+                disabled={!selectedTripId}
+                sx={{
+                  py: 1.5,
+                  px: 3,
+                  borderRadius: 3,
+                  fontSize: '1.1rem',
+                  textTransform: 'none',
+                  background: 'linear-gradient(45deg, #ffffff 30%, #f5f5f5 90%)',
+                  color: '#1a237e',
+                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #f5f5f5 30%, #ffffff 90%)',
+                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+                    transform: 'translateY(-3px)',
+                  },
+                }}
+              >
+                New Accommodation
+              </Button>
+            </Box>
+          </Box>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{editingAccommodation ? 'Edit Accommodation' : 'Create New Accommodation'}</DialogTitle>
+          <Grid container spacing={4}>
+            <AnimatePresence>
+              {accommodationsData?.map((accommodation: Accommodation, index: number) => (
+                <Grid item xs={12} sm={6} md={4} key={accommodation.id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                  >
+                    <StyledCard>
+                      <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <Typography variant="h5" component="h2" sx={{ fontWeight: 600, color: '#1a237e' }}>
+                            {accommodation.name}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <LocationOn sx={{ mr: 1, fontSize: 20, color: '#1a237e' }} />
+                          <Typography variant="body1" sx={{ color: '#424242' }}>
+                            {accommodation.location}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <CalendarToday sx={{ mr: 1, fontSize: 20, color: '#1a237e' }} />
+                          <Typography variant="body1" sx={{ color: '#424242' }}>
+                            {new Date(accommodation.checkIn).toLocaleDateString()} - {new Date(accommodation.checkOut).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <AttachMoney sx={{ mr: 1, fontSize: 20, color: '#1a237e' }} />
+                          <Typography variant="body1" sx={{ color: '#424242' }}>
+                            ${accommodation.price} per night
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <Rating 
+                            value={accommodation.rating} 
+                            readOnly 
+                            precision={0.5}
+                            sx={{
+                              '& .MuiRating-iconFilled': {
+                                color: '#1a237e',
+                              },
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ ml: 1, color: '#424242' }}>
+                            ({accommodation.rating})
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                          {accommodation.amenities.map((amenity, index) => (
+                            <Chip
+                              key={index}
+                              label={amenity}
+                              size="small"
+                              sx={{
+                                borderRadius: 2,
+                                background: 'linear-gradient(45deg, #1a237e 30%, #3949ab 90%)',
+                                color: '#ffffff',
+                                '&:hover': {
+                                  background: 'linear-gradient(45deg, #283593 30%, #3949ab 90%)',
+                                },
+                              }}
+                            />
+                          ))}
+                        </Box>
+                        <Chip 
+                          icon={<Explore />}
+                          label="View Details"
+                          sx={{ 
+                            borderRadius: 2,
+                            background: 'linear-gradient(45deg, #1a237e 30%, #3949ab 90%)',
+                            color: '#ffffff',
+                            '&:hover': {
+                              background: 'linear-gradient(45deg, #283593 30%, #3949ab 90%)',
+                            },
+                          }}
+                        />
+                      </CardContent>
+                      <CardActions sx={{ p: 2, pt: 0 }}>
+                        <Tooltip title="Edit Accommodation">
+                          <IconButton 
+                            size="small" 
+                            sx={{
+                              color: '#1a237e',
+                              '&:hover': {
+                                transform: 'scale(1.1)',
+                                color: '#3949ab',
+                              },
+                            }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete Accommodation">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => deleteMutation.mutate(accommodation.id)}
+                            sx={{
+                              '&:hover': {
+                                transform: 'scale(1.1)',
+                              },
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </CardActions>
+                    </StyledCard>
+                  </motion.div>
+                </Grid>
+              ))}
+            </AnimatePresence>
+          </Grid>
+        </motion.div>
+      </Container>
+
+      <StyledDialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ 
+          color: '#1a237e',
+          fontWeight: 600,
+          fontSize: '1.5rem',
+          textAlign: 'center',
+          pt: 3
+        }}>
+          {editingAccommodation ? 'Edit Accommodation' : 'New Accommodation'}
+        </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
-            <TextField
-              fullWidth
-              label="Name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              margin="normal"
-              required
-              multiline
-              rows={3}
-            />
-            <TextField
-              fullWidth
-              label="Location"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Price"
-              name="price"
-              type="number"
-              value={formData.price}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Rating"
-              name="rating"
-              type="number"
-              value={formData.rating}
-              onChange={handleChange}
-              margin="normal"
-              required
-              inputProps={{ min: 1, max: 5 }}
-            />
-            <TextField
-              fullWidth
-              label="Type"
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              margin="normal"
-              required
-              select
-            >
-              <MenuItem value="HOTEL">Hotel</MenuItem>
-              <MenuItem value="HOSTEL">Hostel</MenuItem>
-              <MenuItem value="APARTMENT">Apartment</MenuItem>
-              <MenuItem value="RESORT">Resort</MenuItem>
-              <MenuItem value="BED_AND_BREAKFAST">Bed and Breakfast</MenuItem>
-            </TextField>
-            <TextField
-              fullWidth
-              label="Check-in Date"
-              name="checkIn"
-              type="date"
-              value={formData.checkIn}
-              onChange={handleChange}
-              margin="normal"
-              required
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              fullWidth
-              label="Check-out Date"
-              name="checkOut"
-              type="date"
-              value={formData.checkOut}
-              onChange={handleChange}
-              margin="normal"
-              required
-              InputLabelProps={{ shrink: true }}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+              <StyledTextField
+                name="name"
+                label="Accommodation Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                fullWidth
+              />
+              <StyledTextField
+                name="description"
+                label="Description"
+                value={formData.description}
+                onChange={handleChange}
+                multiline
+                rows={3}
+                required
+                fullWidth
+              />
+              <StyledTextField
+                name="location"
+                label="Location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+                fullWidth
+              />
+              <StyledTextField
+                name="price"
+                label="Price per Night"
+                type="number"
+                value={formData.price}
+                onChange={handleChange}
+                required
+                fullWidth
+                InputProps={{
+                  startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
+                }}
+              />
+              <StyledFormControl fullWidth>
+                <InputLabel>Type</InputLabel>
+                <Select
+                  name="type"
+                  value={formData.type}
+                  label="Type"
+                  onChange={handleChange}
+                  required
+                >
+                  <MenuItem value="Hotel">Hotel</MenuItem>
+                  <MenuItem value="Resort">Resort</MenuItem>
+                  <MenuItem value="Apartment">Apartment</MenuItem>
+                  <MenuItem value="Villa">Villa</MenuItem>
+                  <MenuItem value="Hostel">Hostel</MenuItem>
+                  <MenuItem value="Bed & Breakfast">Bed & Breakfast</MenuItem>
+                </Select>
+              </StyledFormControl>
+              <Box>
+                <Typography component="legend" sx={{ mb: 1, color: '#1a237e' }}>Rating</Typography>
+                <Rating
+                  name="rating"
+                  value={Number(formData.rating)}
+                  onChange={(event, newValue) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      rating: newValue?.toString() || '0'
+                    }));
+                  }}
+                  precision={0.5}
+                  sx={{
+                    '& .MuiRating-iconFilled': {
+                      color: '#1a237e',
+                    },
+                  }}
+                />
+              </Box>
+              <StyledTextField
+                name="checkIn"
+                label="Check-in Date"
+                type="date"
+                value={formData.checkIn}
+                onChange={handleChange}
+                required
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+              <StyledTextField
+                name="checkOut"
+                label="Check-out Date"
+                type="date"
+                value={formData.checkOut}
+                onChange={handleChange}
+                required
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+              <StyledFormControl fullWidth>
+                <InputLabel>Amenities</InputLabel>
+                <Select
+                  multiple
+                  name="amenities"
+                  value={formData.amenities}
+                  label="Amenities"
+                  onChange={handleChange}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip 
+                          key={value} 
+                          label={value}
+                          size="small"
+                          sx={{
+                            background: 'linear-gradient(45deg, #1a237e 30%, #3949ab 90%)',
+                            color: '#ffffff',
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  <MenuItem value="WiFi">WiFi</MenuItem>
+                  <MenuItem value="Pool">Pool</MenuItem>
+                  <MenuItem value="Restaurant">Restaurant</MenuItem>
+                  <MenuItem value="Gym">Gym</MenuItem>
+                  <MenuItem value="Spa">Spa</MenuItem>
+                  <MenuItem value="Parking">Parking</MenuItem>
+                  <MenuItem value="Air Conditioning">Air Conditioning</MenuItem>
+                  <MenuItem value="Room Service">Room Service</MenuItem>
+                </Select>
+              </StyledFormControl>
+            </Box>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
+          <DialogActions sx={{ px: 3, pb: 3 }}>
+            <Button
+              onClick={handleClose}
+              sx={{
+                color: '#1a237e',
+                '&:hover': {
+                  backgroundColor: 'rgba(26, 35, 126, 0.1)',
+                },
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                background: 'linear-gradient(45deg, #1a237e 30%, #3949ab 90%)',
+                color: '#ffffff',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #283593 30%, #3949ab 90%)',
+                },
+              }}
+            >
               {editingAccommodation ? 'Update' : 'Create'}
             </Button>
           </DialogActions>
         </form>
-      </Dialog>
-    </Container>
+      </StyledDialog>
+    </PageBackground>
   );
 };
 
