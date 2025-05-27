@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -18,6 +18,8 @@ import {
   Tooltip,
   Skeleton,
   Chip,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -36,12 +38,11 @@ import { users } from '../services/api';
 import { motion } from 'framer-motion';
 import { styled } from '@mui/material/styles';
 
-interface UserProfile {
-  id: number;
+interface ProfileData {
   name: string;
   email: string;
-  phone?: string;
-  address?: string;
+  phone: string;
+  address: string;
   preferences?: {
     language: string;
     currency: string;
@@ -126,24 +127,27 @@ const Profile = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: profile, isLoading, error } = useQuery({
+  const { data: profile, isLoading, error } = useQuery<ProfileData, Error>({
     queryKey: ['profile'],
     queryFn: () => users.getProfile().then((res) => res.data),
-    onSuccess: (data) => {
+  } as UseQueryOptions<ProfileData, Error>);
+
+  useEffect(() => {
+    if (profile) {
       setFormData({
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        address: data.address || '',
-        language: data.preferences?.language || 'en',
-        currency: data.preferences?.currency || 'USD',
-        notifications: data.preferences?.notifications ?? true,
+        name: profile.name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        address: profile.address || '',
+        language: profile.preferences?.language || 'en',
+        currency: profile.preferences?.currency || 'USD',
+        notifications: profile.preferences?.notifications ?? true,
       });
-    },
-  });
+    }
+  }, [profile]);
 
   const updateMutation = useMutation({
-    mutationFn: (userData: Partial<UserProfile>) => users.updateProfile(userData),
+    mutationFn: (userData: Partial<ProfileData>) => users.updateProfile(userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       setIsEditing(false);
@@ -462,13 +466,16 @@ const Profile = () => {
                               Notifications
                             </Typography>
                             {isEditing ? (
-                              <StyledTextField
-                                fullWidth
-                                name="notifications"
-                                type="checkbox"
-                                checked={formData.notifications}
-                                onChange={handleChange}
-                                size="small"
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name="notifications"
+                                    checked={formData.notifications}
+                                    onChange={handleChange}
+                                    size="small"
+                                  />
+                                }
+                                label="Enable Notifications"
                               />
                             ) : (
                               <Chip

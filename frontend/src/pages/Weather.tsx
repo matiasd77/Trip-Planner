@@ -354,7 +354,7 @@ const WeatherPage = () => {
                     Forecast
                   </Typography>
                   <Grid container spacing={3}>
-                    {forecastData.dailyForecasts.map((day, index) => (
+                    {forecastData.dailyForecasts.map((day: DailyForecastData, index: number) => (
                       <Grid item xs={12} sm={6} md={4} key={index}>
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
