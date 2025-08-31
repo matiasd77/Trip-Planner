@@ -40,7 +40,8 @@ import {
   AccessTime,
   Business,
 } from '@mui/icons-material';
-import { transport } from '../services/api';
+import { transport, trips } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { styled } from '@mui/material/styles';
 
@@ -86,7 +87,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   overflow: 'hidden',
   '&:hover': {
     transform: 'translateY(-12px) scale(1.02)',
-    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
+            boxShadow: 'none',
   },
 }));
 
@@ -96,7 +97,7 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
     background: 'rgba(255, 255, 255, 0.98)',
     backdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.4)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            boxShadow: 'none',
   },
 }));
 
@@ -108,11 +109,11 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
       transform: 'translateY(-4px)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
     '&.Mui-focused': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
   },
 }));
@@ -125,14 +126,22 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
       transform: 'translateY(-4px)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
     '&.Mui-focused': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
   },
 }));
+
+interface Trip {
+  id: number;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  userId: number;
+}
 
 interface Transport {
   id: number;
@@ -158,7 +167,14 @@ const transportTypes = [
 const TransportPage = () => {
   const [open, setOpen] = useState(false);
   const [editingTransport, setEditingTransport] = useState<Transport | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    type: string;
+    company: string;
+    from: string;
+    to: string;
+    departureTime: string;
+    arrivalTime: string;
+  }>({
     type: '',
     company: '',
     from: '',
@@ -169,11 +185,19 @@ const TransportPage = () => {
 
   const queryClient = useQueryClient();
 
-  const [selectedTripId, setSelectedTripId] = useState<number>(1); // TODO: Get this from route or props
+  const { user } = useAuth();
+  const [selectedTripId, setSelectedTripId] = useState<number | ''>('');
 
-  const { data: transportData, isLoading } = useQuery({
+  const { data: tripsData, isLoading: isLoadingTrips } = useQuery({
+    queryKey: ['trips', user?.id],
+    queryFn: () => trips.getAll(Number(user?.id)).then((res) => res.data),
+    enabled: !!user?.id,
+  });
+
+  const { data: transportData, isLoading: isLoadingTransport } = useQuery({
     queryKey: ['transport', selectedTripId],
-    queryFn: () => transport.getAll(selectedTripId).then((res) => res.data),
+    queryFn: () => transport.getAll(Number(selectedTripId)).then((res) => res.data),
+    enabled: !!selectedTripId,
   });
 
   const createMutation = useMutation({
@@ -210,6 +234,12 @@ const TransportPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Guard clause: ensure a trip is selected
+    if (!selectedTripId) {
+      return;
+    }
+    
     if (editingTransport) {
       // Handle update
     } else {
@@ -220,7 +250,7 @@ const TransportPage = () => {
         to: formData.to,
         departureTime: formData.departureTime,
         arrivalTime: formData.arrivalTime,
-        tripId: selectedTripId
+        tripId: Number(selectedTripId)
       };
       createMutation.mutate(transportData);
     }
@@ -242,7 +272,7 @@ const TransportPage = () => {
     }));
   };
 
-  if (isLoading) {
+  if (isLoadingTrips || isLoadingTransport) {
     return (
       <PageBackground>
         <Container maxWidth="lg">
@@ -297,34 +327,135 @@ const TransportPage = () => {
               alignItems: 'center' 
             }}
           >
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <FormControl sx={{ minWidth: 250 }}>
+                <InputLabel sx={{ 
+                  color: '#1a237e',
+                  fontWeight: 600,
+                  textShadow: 'none'
+                }}>
+                  Select Trip
+                </InputLabel>
+                <Select
+                  value={selectedTripId}
+                  label="Select Trip"
+                  onChange={(e) => setSelectedTripId(e.target.value as number)}
+                  sx={{
+                    borderRadius: 3,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: 'none',
+                    transition: 'all 0.3s ease',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                    '& .MuiSelect-select': {
+                      color: '#1a237e',
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      py: 1.5,
+                    },
+                    '& .MuiSelect-icon': {
+                      color: '#1a237e',
+                      fontSize: '1.5rem',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: 'none',
+                    },
+                    '&.Mui-focused': {
+                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  {tripsData?.map((trip: Trip) => (
+                    <MenuItem 
+                      key={trip.id} 
+                      value={trip.id}
+                      sx={{
+                        color: '#1a237e',
+                        fontWeight: 500,
+                        fontSize: '1rem',
+                        py: 1.5,
+                        mx: 1,
+                        borderRadius: 2,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                          transform: 'translateX(4px)',
+                        },
+                        '&.Mui-selected': {
+                          backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                          color: '#667eea',
+                          fontWeight: 600,
+                          '&:hover': {
+                            backgroundColor: 'rgba(102, 126, 234, 0.3)',
+                          },
+                        },
+                      }}
+                    >
+                      {trip.destination}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
             <Typography 
               variant="h3" 
               component="h1"
               sx={{
                 fontWeight: 800,
                 color: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                textShadow: 'none',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))',
+                animation: 'titleGlow 3s ease-in-out infinite alternate',
+                '@keyframes titleGlow': {
+                  '0%': {
+                    filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))',
+                  },
+                  '100%': {
+                    filter: 'drop-shadow(2px 2px 8px rgba(255,255,255,0.2))',
+                  },
+                },
               }}
             >
               Transport Options
             </Typography>
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              startIcon={<AddIcon sx={{ fontSize: '1.2rem' }} />}
               onClick={handleOpen}
+              disabled={!selectedTripId}
               sx={{
-                py: 1.5,
-                px: 3,
+                py: 2,
+                px: 4,
                 borderRadius: 3,
                 fontSize: '1.1rem',
+                fontWeight: 600,
                 textTransform: 'none',
-                background: 'linear-gradient(45deg, #ffffff 30%, #f5f5f5 90%)',
-                color: '#1a237e',
-                boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: '#ffffff',
+                boxShadow: 'none',
+                border: '2px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #f5f5f5 30%, #ffffff 90%)',
-                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
-                  transform: 'translateY(-3px)',
+                  background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                  boxShadow: 'none',
+                  transform: 'translateY(-3px) scale(1.02)',
+                },
+                '&:disabled': {
+                  background: 'rgba(158, 158, 158, 0.5)',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  boxShadow: 'none',
+                  transform: 'none',
                 },
               }}
             >
@@ -332,9 +463,62 @@ const TransportPage = () => {
             </Button>
           </Box>
 
-          <Grid container spacing={4}>
-            <AnimatePresence>
-              {transportData?.map((item: Transport, index: number) => (
+          {!selectedTripId ? (
+            <Box sx={{ 
+              textAlign: 'center', 
+              py: 12,
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: 4,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              mx: 2
+            }}>
+              <Typography variant="h5" sx={{ 
+                color: '#ffffff', 
+                mb: 2,
+                fontWeight: 600,
+                textShadow: 'none'
+              }}>
+                🚗 Select a Trip First
+              </Typography>
+              <Typography variant="body1" sx={{ 
+                color: 'rgba(255, 255, 255, 0.9)',
+                maxWidth: 400,
+                mx: 'auto'
+              }}>
+                Choose a trip from the dropdown above to start planning your transportation options!
+              </Typography>
+            </Box>
+          ) : !transportData || transportData.length === 0 ? (
+            <Box sx={{ 
+              textAlign: 'center', 
+              py: 12,
+              background: 'rgba(102, 126, 234, 0.1)',
+              borderRadius: 4,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(102, 126, 234, 0.3)',
+              mx: 2
+            }}>
+              <Typography variant="h5" sx={{ 
+                color: '#667eea', 
+                mb: 2,
+                fontWeight: 600,
+                textShadow: 'none'
+              }}>
+                🚀 Ready to Plan Transport!
+              </Typography>
+              <Typography variant="body1" sx={{ 
+                color: 'rgba(255, 255, 255, 0.9)',
+                maxWidth: 400,
+                mx: 'auto'
+              }}>
+                No transportation planned yet. Click the "New Transport" button to start organizing your travel logistics!
+              </Typography>
+            </Box>
+          ) : (
+            <Grid container spacing={4}>
+              <AnimatePresence>
+                {transportData.map((item: Transport, index: number) => (
                 <Grid item xs={12} sm={6} md={4} key={item.id}>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -413,9 +597,10 @@ const TransportPage = () => {
                     </StyledCard>
                   </motion.div>
                 </Grid>
-              ))}
-            </AnimatePresence>
-          </Grid>
+                ))}
+              </AnimatePresence>
+            </Grid>
+          )}
         </motion.div>
       </Container>
 

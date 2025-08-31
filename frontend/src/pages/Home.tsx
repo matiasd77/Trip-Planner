@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Typography, Box, Button, Grid, Card, CardContent, CardMedia, Avatar, Rating } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
@@ -29,10 +29,10 @@ const FeatureCard = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-  '&:hover': {
-    transform: 'translateY(-12px) scale(1.02)',
-    boxShadow: theme.shadows[12],
-  },
+        '&:hover': {
+        transform: 'translateY(-12px) scale(1.02)',
+        boxShadow: 'none',
+      },
 }));
 
 const TestimonialCard = styled(Card)(({ theme }) => ({
@@ -53,6 +53,14 @@ const AnimatedBox = styled(motion.div)({
 
 const Home = () => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication status
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!(userId && token));
+  }, []);
 
   const features = [
     {
@@ -74,6 +82,18 @@ const Home = () => {
       path: '/accommodations',
     },
   ];
+
+  // Conditional features based on authentication
+  const getFeatures = () => {
+    if (isAuthenticated) {
+      return features;
+    }
+    return features.map(feature => ({
+      ...feature,
+      path: '/login',
+      description: feature.description + ' (Login required)'
+    }));
+  };
 
   const testimonials = [
     {
@@ -112,7 +132,7 @@ const Home = () => {
                 color: 'white',
                 fontWeight: 'bold',
                 mb: 3,
-                textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                textShadow: 'none',
                 fontSize: { xs: '2.5rem', md: '4rem' },
               }}
             >
@@ -123,7 +143,7 @@ const Home = () => {
               sx={{
                 color: 'white',
                 mb: 6,
-                textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                textShadow: 'none',
                 maxWidth: '800px',
                 mx: 'auto',
                 fontSize: { xs: '1.2rem', md: '1.5rem' },
@@ -163,8 +183,8 @@ const Home = () => {
         >
           Features
         </Typography>
-        <Grid container spacing={6}>
-          {features.map((feature, index) => (
+                  <Grid container spacing={6}>
+            {getFeatures().map((feature, index) => (
             <Grid item xs={12} md={4} key={index}>
               <AnimatedBox
                 initial={{ opacity: 0, y: 30 }}
@@ -229,7 +249,7 @@ const Home = () => {
                         height: 100, 
                         mb: 3,
                         border: '4px solid white',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        boxShadow: 'none'
                       }}
                     />
                     <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
@@ -271,19 +291,22 @@ const Home = () => {
               p: { xs: 4, md: 8 },
               borderRadius: 4,
               textAlign: 'center',
-              boxShadow: '0 8px 32px rgba(33, 150, 243, 0.2)',
+              boxShadow: 'none',
             }}
           >
             <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
-              Ready to Start Your Adventure?
+              {isAuthenticated ? 'Ready to Plan Your Next Trip?' : 'Ready to Start Your Adventure?'}
             </Typography>
             <Typography variant="h6" sx={{ mb: 6, opacity: 0.9 }}>
-              Join thousands of happy travelers who plan their trips with us
+              {isAuthenticated 
+                ? 'Start planning your next amazing journey with our comprehensive tools'
+                : 'Join thousands of happy travelers who plan their trips with us'
+              }
             </Typography>
             <Button
               variant="contained"
               size="large"
-              onClick={() => navigate('/register')}
+              onClick={() => navigate(isAuthenticated ? '/trips' : '/register')}
               sx={{
                 bgcolor: 'white',
                 color: 'primary.main',
@@ -296,7 +319,7 @@ const Home = () => {
                 },
               }}
             >
-              Sign Up Now
+              {isAuthenticated ? 'Start Planning' : 'Sign Up Now'}
             </Button>
           </Box>
         </AnimatedBox>

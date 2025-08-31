@@ -92,7 +92,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   overflow: 'hidden',
   '&:hover': {
     transform: 'translateY(-12px) scale(1.02)',
-    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
+            boxShadow: 'none',
   },
 }));
 
@@ -104,11 +104,11 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
       transform: 'translateY(-4px)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
     '&.Mui-focused': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
   },
 }));
@@ -228,7 +228,7 @@ const Profile = () => {
               sx={{
                 fontWeight: 800,
                 color: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                textShadow: 'none',
               }}
             >
               Profile
@@ -246,10 +246,10 @@ const Profile = () => {
                   textTransform: 'none',
                   background: 'linear-gradient(45deg, #ffffff 30%, #f5f5f5 90%)',
                   color: '#1a237e',
-                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
+                  boxShadow: 'none',
                   '&:hover': {
                     background: 'linear-gradient(45deg, #f5f5f5 30%, #ffffff 90%)',
-                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+                    boxShadow: 'none',
                     transform: 'translateY(-3px)',
                   },
                 }}

@@ -52,6 +52,9 @@ const Navbar = () => {
 
   const navItems = [
     { text: 'Home', path: '/', icon: <HomeIcon /> },
+  ];
+
+  const authenticatedNavItems = [
     { text: 'Trips', path: '/trips', icon: <FlightTakeoffIcon /> },
     { text: 'Activities', path: '/activities', icon: <LocalActivityIcon /> },
     { text: 'Accommodations', path: '/accommodations', icon: <HotelIcon /> },
@@ -66,6 +69,25 @@ const Navbar = () => {
       </Typography>
       <List>
         {navItems.map((item) => (
+          <ListItem 
+            key={item.text} 
+            component={RouterLink} 
+            to={item.path} 
+            sx={{ 
+              textAlign: 'center',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              }
+            }}
+          >
+            <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+        {isAuthenticated && authenticatedNavItems.map((item) => (
           <ListItem 
             key={item.text} 
             component={RouterLink} 
@@ -158,7 +180,7 @@ const Navbar = () => {
   return (
     <AppBar position="sticky" sx={{ 
       background: 'linear-gradient(135deg, #1a237e 0%, #283593 100%)',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      boxShadow: 'none'
     }}>
       <Container maxWidth="xl">
         <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
@@ -191,6 +213,24 @@ const Navbar = () => {
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               {navItems.map((item) => (
+                <Button
+                  key={item.text}
+                  color="inherit"
+                  component={RouterLink}
+                  to={item.path}
+                  startIcon={item.icon}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      transform: 'translateY(-2px)',
+                      transition: 'all 0.3s ease'
+                    }
+                  }}
+                >
+                  {item.text}
+                </Button>
+              ))}
+              {isAuthenticated && authenticatedNavItems.map((item) => (
                 <Button
                   key={item.text}
                   color="inherit"
@@ -249,7 +289,7 @@ const Navbar = () => {
                       sx: {
                         mt: 1.5,
                         borderRadius: 2,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        boxShadow: 'none'
                       }
                     }}
                   >

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -25,7 +25,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   background: 'rgba(255, 255, 255, 0.98)',
   backdropFilter: 'blur(12px)',
   border: '1px solid rgba(255, 255, 255, 0.3)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+  boxShadow: 'none',
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -36,11 +36,11 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
       transform: 'translateY(-2px)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
     '&.Mui-focused': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
   },
 }));
@@ -59,6 +59,15 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+
+  // Redirect authenticated users to trips page
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+    if (userId && token) {
+      navigate('/trips', { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -273,10 +282,10 @@ const Register = () => {
                     fontSize: '1.1rem',
                     textTransform: 'none',
                     background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                    boxShadow: 'none',
                     '&:hover': {
                       background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
-                      boxShadow: '0 6px 16px rgba(33, 150, 243, 0.4)',
+                      boxShadow: 'none',
                       transform: 'translateY(-2px)',
                     },
                   }}
@@ -326,7 +335,7 @@ const Register = () => {
           sx={{ 
             width: '100%',
             borderRadius: 2,
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            boxShadow: 'none',
           }}
         >
           Registration successful! Redirecting to home...

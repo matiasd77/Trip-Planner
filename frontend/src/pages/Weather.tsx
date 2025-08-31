@@ -105,7 +105,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   overflow: 'hidden',
   '&:hover': {
     transform: 'translateY(-12px) scale(1.02)',
-    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
+            boxShadow: 'none',
   },
 }));
 
@@ -210,7 +210,7 @@ const WeatherPage = () => {
               sx={{
                 fontWeight: 800,
                 color: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                textShadow: 'none',
               }}
             >
               Weather Forecast
@@ -237,10 +237,10 @@ const WeatherPage = () => {
                   textTransform: 'none',
                   background: 'linear-gradient(45deg, #ffffff 30%, #f5f5f5 90%)',
                   color: '#1a237e',
-                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
+                  boxShadow: 'none',
                   '&:hover': {
                     background: 'linear-gradient(45deg, #f5f5f5 30%, #ffffff 90%)',
-                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+                    boxShadow: 'none',
                     transform: 'translateY(-3px)',
                   },
                 }}
@@ -347,7 +347,7 @@ const WeatherPage = () => {
                     variant="h4" 
                     sx={{ 
                       color: '#ffffff',
-                      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                      textShadow: 'none',
                       mb: 3 
                     }}
                   >

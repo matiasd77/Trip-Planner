@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { users } from '../services/api';
 import { motion } from 'framer-motion';
 import { styled } from '@mui/material/styles';
-import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Email, Lock, Info } from '@mui/icons-material';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(6),
@@ -25,7 +25,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   background: 'rgba(255, 255, 255, 0.98)',
   backdropFilter: 'blur(12px)',
   border: '1px solid rgba(255, 255, 255, 0.3)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+  boxShadow: 'none',
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -36,17 +36,18 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
       transform: 'translateY(-2px)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
     '&.Mui-focused': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
     },
   },
 }));
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -54,7 +55,28 @@ const Login = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showRedirectMessage, setShowRedirectMessage] = useState(false);
   const { login } = useAuth();
+
+  // Check if user was redirected due to authentication
+  useEffect(() => {
+    if (location.state?.from) {
+      setShowRedirectMessage(true);
+    }
+  }, [location]);
+
+  // Get the redirect path from location state
+  const redirectPath = location.state?.from || '/trips';
+
+  // Redirect authenticated users to trips page
+  useEffect(() => {
+    // If user is already authenticated, redirect to trips page
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+    if (userId && token) {
+      navigate('/trips', { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -73,7 +95,8 @@ const Login = () => {
       const response = await users.login(formData);
       const userData = response.data;
       login(userData);
-      navigate('/', { replace: true });
+      // Redirect to the original requested page or default to trips
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || 
                           err.response?.data?.message || 
@@ -122,6 +145,30 @@ const Login = () => {
               >
                 Welcome Back
               </Typography>
+
+              {showRedirectMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Alert 
+                    severity="info" 
+                    icon={<Info />}
+                    sx={{ 
+                      mb: 3,
+                      borderRadius: 2,
+                      background: 'rgba(102, 126, 234, 0.1)',
+                      border: '1px solid rgba(102, 126, 234, 0.3)',
+                      '& .MuiAlert-icon': {
+                        color: '#667eea',
+                      },
+                    }}
+                  >
+                    Please log in to access the requested page.
+                  </Alert>
+                </motion.div>
+              )}
 
               {error && (
                 <motion.div
@@ -202,10 +249,10 @@ const Login = () => {
                     fontSize: '1.1rem',
                     textTransform: 'none',
                     background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                    boxShadow: 'none',
                     '&:hover': {
                       background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
-                      boxShadow: '0 6px 16px rgba(33, 150, 243, 0.4)',
+                      boxShadow: 'none',
                       transform: 'translateY(-2px)',
                     },
                   }}
